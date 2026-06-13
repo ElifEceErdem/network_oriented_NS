@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --job-name=ddmat8
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=32G
+#SBATCH --time=02:00:00
+#SBATCH --output=/var/scratch/eerdem/network_oriented_NS/revision_experiments/logs/ddmat8_%j.out
+#SBATCH --error=/var/scratch/eerdem/network_oriented_NS/revision_experiments/logs/ddmat8_%j.out
+# Regenerate the tau=8 diffusion-distance matrix (timed out in the 5-tau run; ~37 min).
+
+set -euo pipefail
+WORKDIR=/var/scratch/eerdem/network_oriented_NS/revision_experiments
+cd "$WORKDIR"
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-16}
+export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK:-16}
+DATA=/var/scratch/eerdem/network_oriented_NS/LightGCN-PyTorch/data/lastfm
+RSCRIPT=/var/scratch/eerdem/anaconda3/envs/r_diffudist/bin/Rscript
+echo "host=$(hostname) generating tau=8"
+"$RSCRIPT" gen_distance_matrices.R "$DATA/graph_edge_list.csv" "$DATA" 8
+echo "exit=$?"

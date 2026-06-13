@@ -1,0 +1,35 @@
+#!/bin/bash
+#SBATCH --job-name=ns_conv
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --time=08:00:00
+#SBATCH --output=/var/scratch/eerdem/network_oriented_NS/revision_experiments/logs/conv_%j.out
+#SBATCH --error=/var/scratch/eerdem/network_oriented_NS/revision_experiments/logs/conv_%j.out
+#
+# Convergence reference run: uniform NS, single seed, long horizon. Procedure.Test() prints
+# metrics every epoch -> parse_results.py / a quick plot to pick the epoch budget for the grid.
+# submit:  sbatch convergence.job
+
+set -euo pipefail
+CODE=/var/scratch/eerdem/network_oriented_NS/LightGCN-PyTorch/code
+PY=/var/scratch/eerdem/anaconda3/envs/networkit_env/bin/python
+RESULTS=/var/scratch/eerdem/network_oriented_NS/revision_experiments/results
+mkdir -p "$RESULTS"
+
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-8}
+export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK:-8}
+export PYTHONUNBUFFERED=1
+export LGCN_CKPT_DIR=/var/scratch/eerdem/network_oriented_NS/revision_experiments/checkpoints/convergence
+mkdir -p "$LGCN_CKPT_DIR"
+
+cd "$CODE"
+"$PY" -u main.py \
+  --dataset=lastfm --neg_sample=uniform --neg_samp_strategy=normal \
+  --add_randomness=0 --positem=10 --negitem=1 \
+  --seed=2020 --epochs=800 --topks="[10]" \
+  --recdim=64 --layer=3 --lr=0.001 --decay=1e-4 \
+  --multicore=1 --tensorboard=0 --load=0 \
+  2>&1 | tee "$RESULTS/convergence-uniform-s2020.log"
+echo "DONE convergence exit=${PIPESTATUS[0]}"

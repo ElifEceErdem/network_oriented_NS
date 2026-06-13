@@ -1,0 +1,59 @@
+#!/bin/bash
+#SBATCH --job-name=nsns
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --time=120:00:00
+#SBATCH --output=/var/scratch/eerdem/network_oriented_NS/revision_experiments/logs/run_%A_%a.out
+#SBATCH --error=/var/scratch/eerdem/network_oriented_NS/revision_experiments/logs/run_%A_%a.out
+#
+# One array task = one (config x seed) run from MANIFEST.
+# Submit with, e.g.:
+#   sbatch --array=1-20 --export=ALL,MANIFEST=manifest.tsv run_array.sbatch
+# (array indices are 1-based and map to data lines, i.e. manifest line number = index+1.)
+
+set -euo pipefail
+
+WORKDIR=/var/scratch/eerdem/network_oriented_NS/revision_experiments
+CODE=/var/scratch/eerdem/network_oriented_NS/LightGCN-PyTorch/code
+PY=/var/scratch/eerdem/anaconda3/envs/networkit_env/bin/python
+RESULTS=$WORKDIR/results
+mkdir -p "$RESULTS" "$WORKDIR/logs"
+
+MANIFEST="${MANIFEST:-$WORKDIR/manifest.tsv}"
+IDX="${SLURM_ARRAY_TASK_ID:?must run as a job array}"
+
+# Read the IDX-th data row (skip header).
+LINE=$(awk -v n=$((IDX + 1)) 'NR==n' "$MANIFEST")
+if [ -z "$LINE" ]; then echo "no manifest line for index $IDX"; exit 1; fi
+IFS=$'\t' read -r runtag neg_sample strategy add_randomness positem negitem tau cmp seed epochs dataset recdim layer lr decay topks multicore <<< "$LINE"
+
+OUT="$RESULTS/${runtag}.log"
+echo "[$(date)] host=$(hostname) runtag=$runtag" | tee "$OUT"
+echo "cfg: neg_sample=$neg_sample strategy=$strategy ar=$add_randomness positem=$positem negitem=$negitem tau=$tau seed=$seed epochs=$epochs" | tee -a "$OUT"
+
+# Each run gets its own checkpoint dir so parallel array tasks never collide.
+# world.py reads LGCN_CKPT_DIR (getFileName() ignores --path), so this is the one that matters.
+CKPT_DIR=$WORKDIR/checkpoints/$runtag
+mkdir -p "$CKPT_DIR"
+export LGCN_CKPT_DIR="$CKPT_DIR"
+
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-8}
+export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK:-8}
+export PYTHONUNBUFFERED=1
+
+cmp_arg=()
+if [ -n "$cmp" ] && [ "$cmp" != "na" ]; then cmp_arg=(--commute_matrix_path "$cmp"); fi
+
+cd "$CODE"
+"$PY" -u main.py \
+  --dataset="$dataset" --neg_sample="$neg_sample" --neg_samp_strategy="$strategy" \
+  --add_randomness="$add_randomness" --positem="$positem" --negitem="$negitem" \
+  "${cmp_arg[@]}" \
+  --seed="$seed" --epochs="$epochs" --topks="$topks" \
+  --recdim="$recdim" --layer="$layer" --lr="$lr" --decay="$decay" \
+  --multicore="$multicore" --tensorboard=0 --load=0 --path="$CKPT_DIR" \
+  2>&1 | tee -a "$OUT"
+
+echo "[$(date)] DONE runtag=$runtag exit=${PIPESTATUS[0]}" | tee -a "$OUT"

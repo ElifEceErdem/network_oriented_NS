@@ -20,7 +20,10 @@ ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
 CODE_PATH = join(ROOT_PATH, 'code')
 DATA_PATH = join(ROOT_PATH, 'data')
 BOARD_PATH = join(CODE_PATH, 'runs')
-FILE_PATH = join(CODE_PATH, 'checkpoints')
+# Allow per-run checkpoint dir so parallel SLURM array tasks don't clobber the same
+# weight file (getFileName() names by dataset/layer/recdim only). Results-neutral:
+# checkpoints are write-only here (main.py runs with --load=0).
+FILE_PATH = os.environ.get('LGCN_CKPT_DIR', join(CODE_PATH, 'checkpoints'))
 import sys
 sys.path.append(join(CODE_PATH, 'sources'))
 

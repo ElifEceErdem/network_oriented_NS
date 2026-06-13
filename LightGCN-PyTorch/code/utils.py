@@ -66,6 +66,97 @@ def scale_dict_values(d, min_scale=1, max_scale=10):
     return scaled_values
 
 
+# ======================================================================================
+# Revision speedup: cache static per-user candidate structures.
+#
+# The graph samplers (PL-NS / DD-NS) rebuild the SAME per-user candidate rankings every
+# epoch. These rankings depend only on the (fixed) training graph and the user's positive
+# set -- not on the seed, negitem, positem, or epoch -- so we build them once, cache to
+# disk, and copy per epoch. The random draws (rng.sample / np.random / random.choice) are
+# left untouched and in the same order, so for add_randomness==0 the produced negative
+# samples are identical to the original code (verified by validate_sampler_equivalence.py).
+# ======================================================================================
+
+def _ns_cache_dir():
+    d = os.path.join(world.DATA_PATH, world.dataset, 'ns_cache')
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+def _naive_bases(dataset):
+    """Per-user static structures for naive_random_walk (PL-NS).
+
+    base_filtered_list[u_<id>]: path-length-replicated item list minus the user's positives
+                                (candidate pool for the 'normal' strategy).
+    base_filtered_dict[u_<id>]: {item: path_length} minus the user's positives
+                                (candidate pool for the 'q1'/'q2' strategies).
+    Identical contents/order to the per-epoch rebuild in the original code.
+    """
+    cached = getattr(dataset, '_naive_bases_cache', None)
+    if cached is not None:
+        return cached
+    cache_path = os.path.join(_ns_cache_dir(), 'naive_bases.pkl')
+    if os.path.exists(cache_path):
+        with open(cache_path, 'rb') as f:
+            bases = pickle.load(f)
+        dataset._naive_bases_cache = bases
+        return bases
+
+    allPos = dataset.allPos
+    path_length_dict = dataset.path_length_dict
+    path_length_prob_dict = dataset.path_length_prob_dict
+    base_filtered_list = {}
+    base_filtered_dict = {}
+    for user in tqdm(range(dataset.n_users), desc='precompute PL-NS bases'):
+        user_id = 'u_' + str(user)
+        if user_id not in path_length_prob_dict:
+            continue
+        prefixed_all_pos = ['i_' + str(x) for x in allPos[user]]
+        pos_set = set(prefixed_all_pos)
+        fl = [item for item in path_length_prob_dict[user_id] if item.startswith('i_')]
+        fl = [x for x in fl if x not in pos_set]
+        base_filtered_list[user_id] = fl
+        all_path_for_user = path_length_dict[user_id]
+        fd = {k: v for k, v in all_path_for_user.items()
+              if (not k.startswith('u_')) and (k not in pos_set)}
+        base_filtered_dict[user_id] = fd
+    bases = (base_filtered_list, base_filtered_dict)
+    with open(cache_path, 'wb') as f:
+        pickle.dump(bases, f)
+    dataset._naive_bases_cache = bases
+    return bases
+
+
+def _commute_bases(dataset):
+    """Per-user static candidate dict for commute_distance (DD-NS): {item_id: diffusion_distance}
+    with the user's positives removed. Depends on the (tau-specific) distance matrix and the
+    user's positive set only -> built once and cached keyed by the matrix file (tau)."""
+    cached = getattr(dataset, '_commute_bases_cache', None)
+    if cached is not None:
+        return cached
+    tag = os.path.splitext(os.path.basename(world.config['commute_matrix_path']))[0]
+    cache_path = os.path.join(_ns_cache_dir(), 'commute_bases_%s.pkl' % tag)
+    if os.path.exists(cache_path):
+        with open(cache_path, 'rb') as f:
+            base = pickle.load(f)
+        dataset._commute_bases_cache = base
+        return base
+
+    allPos = dataset.allPos
+    distance_dict = dataset.distance_dict
+    base = {}
+    for user in tqdm(range(dataset.n_users), desc='precompute DD-NS bases'):
+        user_id = 'u_' + str(user)
+        if user_id not in distance_dict:
+            continue
+        pos_set = set('i_' + str(x) for x in allPos[user])
+        base[user_id] = {k: v for k, v in distance_dict[user_id].items() if k not in pos_set}
+    with open(cache_path, 'wb') as f:
+        pickle.dump(base, f)
+    dataset._commute_bases_cache = base
+    return base
+
+
 class BPRLoss:
     def __init__(self,
                  recmodel : PairWiseModel,
@@ -804,7 +895,19 @@ def Naive_random_walk_original_python(dataset):
     #
     #S = []
     S = UniformSample_original_python(dataset).tolist()
-    
+
+    # --- revision: cached static candidate structures (see _naive_bases) -------------
+    base_filtered_list, base_filtered_dict = _naive_bases(dataset)
+    # RNS bug fix: use the ONE shared uniform sample S (above) and a precomputed
+    # user -> first (pos, neg) index, instead of regenerating S inside the per-user loop
+    # (the original was O(N^2) and discarded earlier users' strategy negatives).
+    uni_first = {}
+    if dataset.add_randomness == 1:
+        for _el in S:
+            if _el[0] not in uni_first:
+                uni_first[_el[0]] = (_el[1], _el[2])
+    # --------------------------------------------------------------------------------
+
     for i, user in enumerate(tqdm(users, desc='Naive RW Sampling')):
         exception_neg_list = []
         posForUser = allPos[user]
@@ -820,38 +923,33 @@ def Naive_random_walk_original_python(dataset):
             posForUser = rng.sample(list(posForUser), k=nbr_pos_item)
         
         user_id = 'u_' + str(user)
-    
-        # normal
-        path_length_prob_list_for_user = path_length_prob_dict[user_id]
-        filtered_list = [item for item in path_length_prob_list_for_user if item.startswith('i_')]
-        filtered_list = [x for x in filtered_list if x not in prefixed_all_pos]
 
-        # q1 & q2
-        all_path_for_user = path_length_dict[user_id]
-        path_for_user = {key: value for key, value in all_path_for_user.items() if not key.startswith('u_')}
-        filtered_dict = {key: value for key, value in path_for_user.items() if key not in prefixed_all_pos}
-        
-        
+        # normal / q1 / q2: copy the precomputed static candidate structures for this user
+        # (identical contents and order to rebuilding them every epoch, just far cheaper).
+        filtered_list = list(base_filtered_list.get(user_id, []))
+        filtered_dict = dict(base_filtered_dict.get(user_id, {}))
+
+
         if dataset.add_randomness == 1:
-            S = UniformSample_original_python(dataset).tolist()
-            
-            calculated_uni_pos = [element[1] for element in S if element[0] == user][0] #uniform neg samp'in o userin aldigi random pos item'ini bul
+            # Shared uniform sample S (computed once before the loop); look up this user's
+            # first uniform (pos, neg) via the prebuilt index instead of scanning all of S.
+            if user in uni_first:
+                calculated_uni_pos, calculated_uni_neg = uni_first[user]
 
-            if calculated_uni_pos in posForUser:
-                posForUser = [x for x in posForUser if x != calculated_uni_pos]
+                if calculated_uni_pos in posForUser:
+                    posForUser = [x for x in posForUser if x != calculated_uni_pos]
 
-            calculated_uni_neg = [element[2] for element in S if element[0] == user][0]
-            calculated_uni_neg_id = 'i_' + str(calculated_uni_neg)
+                calculated_uni_neg_id = 'i_' + str(calculated_uni_neg)
 
-            if calculated_uni_neg_id in filtered_list:
-                filtered_list.remove(calculated_uni_neg_id)
-            
-            if calculated_uni_neg_id in filtered_dict:
-                filtered_dict = {key: value for key, value in filtered_dict.items() if key != calculated_uni_neg_id}
+                if calculated_uni_neg_id in filtered_list:
+                    filtered_list.remove(calculated_uni_neg_id)
+
+                if calculated_uni_neg_id in filtered_dict:
+                    filtered_dict = {key: value for key, value in filtered_dict.items() if key != calculated_uni_neg_id}
 
             # Calculate uniform neg sampling (uni neg + random negs for other pos items)
 
-            for positem in posForUser:  
+            for positem in posForUser:
                 while True:
                     # uniform negative sampling
                     negitem_uniform = rng.sample(list(allNegs[user]), k=1)
@@ -1057,6 +1155,17 @@ def Commute_distance_original_python(dataset):
     #S = []
     S = UniformSample_original_python(dataset).tolist()
 
+    # --- revision: cached static per-user candidate dicts (see _commute_bases) -------
+    base_filtered_dict_all = _commute_bases(dataset)
+    # RNS bug fix: ONE shared uniform sample S + precomputed user->first-(pos,neg) index,
+    # instead of regenerating S inside the per-user loop (O(N^2) + discarded strategy negs).
+    uni_first = {}
+    if dataset.add_randomness == 1:
+        for _el in S:
+            if _el[0] not in uni_first:
+                uni_first[_el[0]] = (_el[1], _el[2])
+    # --------------------------------------------------------------------------------
+
     for i, user in enumerate(tqdm(users, desc='Commute Distance Sampling')):
         posForUser_0 = allPos[user]
         prefix = 'i_'
@@ -1071,29 +1180,26 @@ def Commute_distance_original_python(dataset):
             posForUser = allPos[user]
 
         user_id = 'u_' + str(user)
-        distance_for_user = distance_dict[user_id]
-
-        filtered_dict = {key: value for key, value in distance_for_user.items() if key not in prefixed_all_pos}
+        # copy the precomputed static candidate dict for this user (distance row minus positives)
+        filtered_dict = dict(base_filtered_dict_all.get(user_id, {}))
 
         if dataset.add_randomness == 1:
-            S = UniformSample_original_python(dataset).tolist()
+            # Shared uniform sample S (computed once); look up this user's first uniform
+            # (pos, neg) via the prebuilt index instead of scanning all of S.
+            if user in uni_first:
+                calculated_uni_pos, calculated_uni_neg = uni_first[user]
 
-            calculated_uni_pos = [element[1] for element in S if element[0] == user][0] #uniform neg samp'in o userin aldigi random pos item'ini bul
+                if calculated_uni_pos in posForUser:
+                    posForUser = [x for x in posForUser if x != calculated_uni_pos]
 
-            if calculated_uni_pos in posForUser:
-                posForUser = [x for x in posForUser if x != calculated_uni_pos]
+                calculated_uni_neg_id = 'i_' + str(calculated_uni_neg)
 
-            calculated_uni_neg = [element[2] for element in S if element[0] == user][0]
-            calculated_uni_neg_id = 'i_' + str(calculated_uni_neg)
-
-
-            if calculated_uni_neg_id in filtered_dict:
-                filtered_dict = {key: value for key, value in filtered_dict.items() if key != calculated_uni_neg_id}
+                if calculated_uni_neg_id in filtered_dict:
+                    filtered_dict = {key: value for key, value in filtered_dict.items() if key != calculated_uni_neg_id}
 
             # Calculate uniform neg sampling (uni neg + random negs for other pos items)
 
-
-            for positem in posForUser:  
+            for positem in posForUser:
                 while True:
                     # uniform negative sampling
                     negitem_uniform = rng.sample(list(allNegs[user]), k=1)
@@ -1114,9 +1220,36 @@ def Commute_distance_original_python(dataset):
                 # remove randomly selected neg items 
                 filtered_dict = {key: value for key, value in filtered_dict.items() if key != negitem_uniform_id}
 
-        for positem in posForUser:
+        # 'scaled'/'scaled_weighted': precompute this user's negatives once (O(n)) rather than
+        # O(n) per positem. furthest/nearest/q1/q2 remain per-positem (they shrink filtered_dict).
+        precomputed = None
+        if dataset.neg_samp_strategy in ('scaled', 'scaled_weighted'):
+            keys_list = list(filtered_dict.keys())
+            k = len(posForUser)
+            if len(keys_list) >= k and k > 0:
+                if dataset.neg_samp_strategy == 'scaled':
+                    # As-published 'Long-Distance' == uniform sampling without replacement
+                    # (scale_dict_values + double random.choice provably collapses to 1/n;
+                    #  see revision_experiments/validate_dd_scaled.py).
+                    precomputed = random.sample(keys_list, k)
+                else:
+                    # CORRECTED long-distance weighting: favour far items, P(item) ~ distance.
+                    w = np.array([filtered_dict[kk] for kk in keys_list], dtype=float)
+                    w = w / w.sum()
+                    idx = np.random.choice(len(keys_list), size=k, replace=False, p=w)
+                    precomputed = [keys_list[j] for j in idx]
 
-            if dataset.neg_samp_strategy == 'furthest':
+        for positem_i, positem in enumerate(posForUser):
+
+            if precomputed is not None:
+                selected_elements = [precomputed[positem_i]]
+
+            elif dataset.neg_samp_strategy in ('scaled', 'scaled_weighted'):
+                # fallback (fewer candidate items than positems): uniform with removal
+                selected_elements = [random.choice(list(filtered_dict.keys()))]
+                filtered_dict = {key: value for key, value in filtered_dict.items() if key != selected_elements[0]}
+
+            elif dataset.neg_samp_strategy == 'furthest':
                 sorted_dict = dict(sorted(filtered_dict.items(), key=lambda x: x[1], reverse=True)) #biggest to smallest
                 sorted_items_list = list(sorted_dict.keys())
                 selected_elements = [sorted_items_list[0]]
@@ -1152,8 +1285,8 @@ def Commute_distance_original_python(dataset):
 
                 filtered_dict = {key: value for key, value in filtered_dict.items() if key != selected_elements[0]}
 
-            elif dataset.neg_samp_strategy == 'scaled':
-                # Calculate the scaled dict 
+            elif dataset.neg_samp_strategy == '_scaled_legacy_unused':
+                # Superseded by the precompute above (kept for reference; provably == uniform).
                 scaled_dict = scale_dict_values(filtered_dict)
 
                 # Calculate the scaled list 

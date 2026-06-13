@@ -537,14 +537,29 @@ class LastFM(BasicDataset):
 
             #/home/ece/Desktop/Negative_Sampling/LightGCN-PyTorch/data/lastfm/distance_tau1.csv
 
-            df = pd.read_csv(commute_matrix_path)
-
-            df = df.set_index('Unnamed: 0')
-
-            # Create dictionary with progress bar
-            self.distance_dict = {}
-            for row_index, row in tqdm(df.iterrows(), total=len(df)):
-                self.distance_dict[row_index] = {key: value for key, value in row.items() if not key.startswith('u_')}
+            # Cache the parsed distance dict (keyed by the matrix file) to avoid re-parsing the
+            # large CSV (~hundreds of MB) on every DD-NS run.
+            _ddcache_dir = os.path.join(os.path.dirname(commute_matrix_path), 'ns_cache')
+            os.makedirs(_ddcache_dir, exist_ok=True)
+            _dd_tag = os.path.splitext(os.path.basename(commute_matrix_path))[0]
+            _dd_pkl = os.path.join(_ddcache_dir, 'distance_dict_%s.pkl' % _dd_tag)
+            _bases_pkl = os.path.join(_ddcache_dir, 'commute_bases_%s.pkl' % _dd_tag)
+            if os.path.exists(_bases_pkl):
+                # The sampler loads the per-user candidate cache (commute_bases) directly, so the
+                # full distance matrix is not needed at runtime -> skip the heavy load entirely.
+                self.distance_dict = {}
+            elif os.path.exists(_dd_pkl):
+                with open(_dd_pkl, 'rb') as _f:
+                    self.distance_dict = pickle.load(_f)
+            else:
+                df = pd.read_csv(commute_matrix_path)
+                df = df.set_index('Unnamed: 0')
+                # Create dictionary with progress bar
+                self.distance_dict = {}
+                for row_index, row in tqdm(df.iterrows(), total=len(df)):
+                    self.distance_dict[row_index] = {key: value for key, value in row.items() if not key.startswith('u_')}
+                with open(_dd_pkl, 'wb') as _f:
+                    pickle.dump(self.distance_dict, _f)
 
             # for row_index, row in tqdm(df.iterrows(), total=len(df)):
                 

@@ -1,0 +1,44 @@
+#!/bin/bash
+#SBATCH --job-name=ddwarm
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=48G
+#SBATCH --time=03:00:00
+#SBATCH --output=/var/scratch/eerdem/network_oriented_NS/revision_experiments/logs/ddwarm_%j.out
+#SBATCH --error=/var/scratch/eerdem/network_oriented_NS/revision_experiments/logs/ddwarm_%j.out
+# Build the DD-NS per-tau caches once (sequential, fresh process per tau) so the 360 DD array
+# tasks never race to build them. Idempotent: skips taus whose commute_bases cache exists.
+
+set -euo pipefail
+WORKDIR=/var/scratch/eerdem/network_oriented_NS/revision_experiments
+DATA=/var/scratch/eerdem/network_oriented_NS/LightGCN-PyTorch/data/lastfm
+PY=/var/scratch/eerdem/anaconda3/envs/networkit_env/bin/python
+export PYTHONUNBUFFERED=1
+
+for tau in 0.5 1 2 4 8; do
+  csv="$DATA/distance_tau${tau}.csv"
+  bases="$DATA/ns_cache/commute_bases_distance_tau${tau}.pkl"
+  if [ ! -f "$csv" ]; then echo "MISSING matrix $csv -- skipping tau=$tau"; continue; fi
+  if [ -f "$bases" ]; then echo "tau=$tau already warmed -> $bases"; continue; fi
+  echo "=== warming tau=$tau ($csv) ==="
+  "$PY" "$WORKDIR/warmup_caches.py" "$csv"
+done
+
+# DD smoke: confirm the optimized commute_distance sampler runs end-to-end (scaled + scaled_weighted)
+# before the 360-run array is released. A crash here fails the job -> afterok blocks the array.
+mkdir -p "$WORKDIR/results"
+export LGCN_CKPT_DIR="$WORKDIR/checkpoints/ddsmoke"; mkdir -p "$LGCN_CKPT_DIR"
+cd /var/scratch/eerdem/network_oriented_NS/LightGCN-PyTorch/code
+for strat in scaled scaled_weighted; do
+  echo "=== DD smoke: $strat tau=1 ar=0 2 epochs ==="
+  "$PY" -u main.py --dataset=lastfm --neg_sample=commute_distance --neg_samp_strategy=$strat \
+    --add_randomness=0 --positem=10 --negitem=1 --commute_matrix_path="$DATA/distance_tau1.csv" \
+    --seed=2020 --epochs=2 --topks="[10]" --recdim=64 --layer=3 --lr=0.001 --decay=1e-4 \
+    --multicore=0 --tensorboard=0 --load=0 | tee "$WORKDIR/results/ddsmoke-${strat}-tau1.log"
+  rc=${PIPESTATUS[0]}
+  echo "DD smoke $strat exit=$rc"
+  [ "$rc" -eq 0 ] || { echo "DD SMOKE FAILED ($strat)"; exit 1; }
+done
+echo "DONE warmup"

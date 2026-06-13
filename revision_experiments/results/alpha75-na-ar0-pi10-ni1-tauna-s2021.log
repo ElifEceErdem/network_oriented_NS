@@ -1,0 +1,196 @@
+[Sun Jun 14 09:18:03 CEST 2026] host=node407 runtag=alpha75-na-ar0-pi10-ni1-tauna-s2021
+cfg: neg_sample=alpha75 strategy=na ar=0 positem=10 negitem=1 tau=na seed=2021 epochs=400
+[0;30;43mCpp extension not loaded[0m
+>>SEED: 2021
+[0;30;43mloading [last fm][0m
+LastFm Sparsity : 0.006201205012770235
+===========config================
+{'A_n_fold': 100,
+ 'A_split': False,
+ 'add_randomness': 0,
+ 'alpha': 1,
+ 'batch_size': 4096,
+ 'bigdata': False,
+ 'bpr_batch_size': 2048,
+ 'commute_matrix_path': '../data/lastfm/distance_tau1.csv',
+ 'decay': 0.0001,
+ 'dropout': 0,
+ 'gamma': 0.3,
+ 'keep_prob': 0.6,
+ 'latent_dim_rec': 64,
+ 'lightGCN_n_layers': 3,
+ 'lr': 0.001,
+ 'multicore': 1,
+ 'neg_samp_strategy': 'na',
+ 'neg_sample': 'alpha75',
+ 'negitem': 1,
+ 'pool': 'mean',
+ 'positem': 10,
+ 'pretrain': 0,
+ 'test_u_batch_size': 100,
+ 'warmup': 100}
+cores for test: 16
+comment: lgn
+tensorboard: 0
+LOAD: 0
+Weight path: /var/scratch/eerdem/network_oriented_NS/revision_experiments/checkpoints/alpha75-na-ar0-pi10-ni1-tauna-s2021
+Test Topks: [10]
+using bpr loss
+===========end===================
+[0;30;43muse NORMAL distribution initilizer[0m
+/var/scratch/eerdem/network_oriented_NS/LightGCN-PyTorch/code/dataloader.py:671: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at ../torch/csrc/utils/tensor_new.cpp:605.)
+  self.Graph = torch.sparse.IntTensor(index, data, torch.Size([self.n_users+self.m_items, self.n_users+self.m_items]))
+lgn is already to go(dropout:0)
+load and save to /var/scratch/eerdem/network_oriented_NS/revision_experiments/checkpoints/alpha75-na-ar0-pi10-ni1-tauna-s2021/lgn-lastfm-3-64.pth.tar
+[0;30;43mnot enable tensorflowboard[0m
+  0%|          | 0/400 [00:00<?, ?it/s][0;30;43m[TEST][0m
+{'precision': array([0.00096878]), 'recall': array([0.00218235]), 'ndcg': array([0.00156019])}
+(648375, 3)
+EPOCH[1/400] loss0.687-|Sample:4.42|
+  0%|          | 1/400 [00:14<1:36:35, 14.53s/it][0;30;43m[TEST][0m
+{'precision': array([0.00780409]), 'recall': array([0.01402723]), 'ndcg': array([0.01177717])}
+(648365, 3)
+EPOCH[2/400] loss0.648-|Sample:5.27|
+  0%|          | 2/400 [00:29<1:39:52, 15.06s/it][0;30;43m[TEST][0m
+{'precision': array([0.02707212]), 'recall': array([0.05019934]), 'ndcg': array([0.04448302])}
+(646946, 3)
+EPOCH[3/400] loss0.438-|Sample:5.09|
+  1%|          | 3/400 [00:44<1:39:07, 14.98s/it][0;30;43m[TEST][0m
+{'precision': array([0.04370291]), 'recall': array([0.07726943]), 'ndcg': array([0.06866459])}
+(648625, 3)
+EPOCH[4/400] loss0.249-|Sample:4.47|
+  1%|          | 4/400 [00:58<1:36:18, 14.59s/it][0;30;43m[TEST][0m
+{'precision': array([0.05538213]), 'recall': array([0.09806764]), 'ndcg': array([0.08893231])}
+(647683, 3)
+EPOCH[5/400] loss0.167-|Sample:4.58|
+  1%|▏         | 5/400 [01:13<1:35:19, 14.48s/it][0;30;43m[TEST][0m
+{'precision': array([0.06200215]), 'recall': array([0.11039745]), 'ndcg': array([0.10147316])}
+(648195, 3)
+EPOCH[6/400] loss0.123-|Sample:4.44|
+  2%|▏         | 6/400 [01:27<1:34:10, 14.34s/it][0;30;43m[TEST][0m
+{'precision': array([0.06776103]), 'recall': array([0.11942488]), 'ndcg': array([0.10967232])}
+(647018, 3)
+EPOCH[7/400] loss0.094-|Sample:4.28|
+  2%|▏         | 7/400 [01:41<1:33:24, 14.26s/it][0;30;43m[TEST][0m
+{'precision': array([0.0722282]), 'recall': array([0.12899087]), 'ndcg': array([0.11837628])}
+(648698, 3)
+EPOCH[8/400] loss0.076-|Sample:4.44|
+  2%|▏         | 8/400 [01:55<1:32:41, 14.19s/it][0;30;43m[TEST][0m
+{'precision': array([0.07508073]), 'recall': array([0.13554978]), 'ndcg': array([0.12420678])}
+(647417, 3)
+EPOCH[9/400] loss0.063-|Sample:4.56|
+  2%|▏         | 9/400 [02:09<1:32:33, 14.20s/it][0;30;43m[TEST][0m
+{'precision': array([0.0770183]), 'recall': array([0.13835191]), 'ndcg': array([0.12715078])}
+(649319, 3)
+EPOCH[10/400] loss0.054-|Sample:4.42|
+  2%|▎         | 10/400 [02:23<1:31:36, 14.09s/it][0;30;43m[TEST][0m
+{'precision': array([0.0785253]), 'recall': array([0.14108181]), 'ndcg': array([0.12912624])}
+(648274, 3)
+EPOCH[11/400] loss0.047-|Sample:4.45|
+  3%|▎         | 11/400 [02:37<1:31:09, 14.06s/it][0;30;43m[TEST][0m
+{'precision': array([0.07960172]), 'recall': array([0.14414781]), 'ndcg': array([0.13110284])}
+(646837, 3)
+EPOCH[12/400] loss0.042-|Sample:4.53|
+  3%|▎         | 12/400 [02:51<1:30:36, 14.01s/it][0;30;43m[TEST][0m
+{'precision': array([0.08046286]), 'recall': array([0.14492805]), 'ndcg': array([0.13251615])}
+(648486, 3)
+EPOCH[13/400] loss0.037-|Sample:4.42|
+  3%|▎         | 13/400 [03:05<1:30:32, 14.04s/it][0;30;43m[TEST][0m
+{'precision': array([0.08035522]), 'recall': array([0.14530734]), 'ndcg': array([0.13151243])}
+(649045, 3)
+EPOCH[14/400] loss0.034-|Sample:4.43|
+  4%|▎         | 14/400 [03:19<1:30:22, 14.05s/it][0;30;43m[TEST][0m
+{'precision': array([0.08013994]), 'recall': array([0.14393049]), 'ndcg': array([0.13215834])}
+(648272, 3)
+EPOCH[15/400] loss0.031-|Sample:4.49|
+  4%|▍         | 15/400 [03:33<1:30:33, 14.11s/it][0;30;43m[TEST][0m
+{'precision': array([0.08089343]), 'recall': array([0.14494309]), 'ndcg': array([0.133521])}
+(648700, 3)
+EPOCH[16/400] loss0.028-|Sample:4.48|
+  4%|▍         | 16/400 [03:47<1:30:29, 14.14s/it][0;30;43m[TEST][0m
+{'precision': array([0.08143165]), 'recall': array([0.14736427]), 'ndcg': array([0.13365414])}
+(649414, 3)
+EPOCH[17/400] loss0.027-|Sample:4.48|
+  4%|▍         | 17/400 [04:02<1:30:21, 14.15s/it][0;30;43m[TEST][0m
+{'precision': array([0.08159311]), 'recall': array([0.14809253]), 'ndcg': array([0.13524809])}
+(651051, 3)
+EPOCH[18/400] loss0.025-|Sample:4.29|
+  4%|▍         | 18/400 [04:16<1:30:00, 14.14s/it][0;30;43m[TEST][0m
+{'precision': array([0.08153929]), 'recall': array([0.14671055]), 'ndcg': array([0.13604582])}
+(647315, 3)
+EPOCH[19/400] loss0.023-|Sample:4.44|
+  5%|▍         | 19/400 [04:30<1:29:40, 14.12s/it][0;30;43m[TEST][0m
+{'precision': array([0.08110872]), 'recall': array([0.14654747]), 'ndcg': array([0.13563091])}
+(649089, 3)
+EPOCH[20/400] loss0.022-|Sample:4.42|
+  5%|▌         | 20/400 [04:44<1:30:05, 14.22s/it][0;30;43m[TEST][0m
+{'precision': array([0.0810549]), 'recall': array([0.14605855]), 'ndcg': array([0.13627749])}
+(646958, 3)
+EPOCH[21/400] loss0.021-|Sample:4.54|
+  5%|▌         | 21/400 [04:59<1:30:22, 14.31s/it][0;30;43m[TEST][0m
+{'precision': array([0.08229279]), 'recall': array([0.14820087]), 'ndcg': array([0.13661382])}
+(650261, 3)
+EPOCH[22/400] loss0.019-|Sample:4.46|
+  6%|▌         | 22/400 [05:13<1:29:39, 14.23s/it][0;30;43m[TEST][0m
+{'precision': array([0.08164693]), 'recall': array([0.14686045]), 'ndcg': array([0.1353867])}
+(646970, 3)
+EPOCH[23/400] loss0.019-|Sample:4.38|
+  6%|▌         | 23/400 [05:27<1:28:44, 14.12s/it][0;30;43m[TEST][0m
+{'precision': array([0.08137783]), 'recall': array([0.14697245]), 'ndcg': array([0.13540776])}
+(648686, 3)
+EPOCH[24/400] loss0.018-|Sample:4.55|
+  6%|▌         | 24/400 [05:41<1:28:32, 14.13s/it][0;30;43m[TEST][0m
+{'precision': array([0.08083961]), 'recall': array([0.14489977]), 'ndcg': array([0.1356544])}
+(648115, 3)
+EPOCH[25/400] loss0.017-|Sample:4.41|
+  6%|▋         | 25/400 [05:55<1:28:23, 14.14s/it][0;30;43m[TEST][0m
+{'precision': array([0.08121636]), 'recall': array([0.14644549]), 'ndcg': array([0.13454506])}
+(649201, 3)
+EPOCH[26/400] loss0.017-|Sample:4.42|
+  6%|▋         | 26/400 [06:09<1:27:58, 14.11s/it][0;30;43m[TEST][0m
+{'precision': array([0.07965554]), 'recall': array([0.14258225]), 'ndcg': array([0.13254071])}
+(647923, 3)
+EPOCH[27/400] loss0.016-|Sample:4.26|
+  7%|▋         | 27/400 [06:23<1:27:17, 14.04s/it][0;30;43m[TEST][0m
+{'precision': array([0.07992465]), 'recall': array([0.14356251]), 'ndcg': array([0.13302089])}
+(648095, 3)
+EPOCH[28/400] loss0.016-|Sample:4.54|
+  7%|▋         | 28/400 [06:37<1:27:10, 14.06s/it][0;30;43m[TEST][0m
+{'precision': array([0.08062433]), 'recall': array([0.14542739]), 'ndcg': array([0.13444684])}
+(648879, 3)
+EPOCH[29/400] loss0.015-|Sample:4.49|
+  7%|▋         | 29/400 [06:53<1:29:59, 14.55s/it][0;30;43m[TEST][0m
+{'precision': array([0.08078579]), 'recall': array([0.14444947]), 'ndcg': array([0.13472749])}
+(645935, 3)
+EPOCH[30/400] loss0.014-|Sample:4.41|
+  8%|▊         | 30/400 [07:07<1:29:45, 14.56s/it][0;30;43m[TEST][0m
+{'precision': array([0.08008611]), 'recall': array([0.14400982]), 'ndcg': array([0.13411141])}
+(647961, 3)
+EPOCH[31/400] loss0.014-|Sample:4.30|
+  8%|▊         | 31/400 [07:21<1:28:14, 14.35s/it][0;30;43m[TEST][0m
+{'precision': array([0.0803014]), 'recall': array([0.1444133]), 'ndcg': array([0.13542453])}
+(649184, 3)
+EPOCH[32/400] loss0.014-|Sample:4.45|
+  8%|▊         | 32/400 [07:35<1:27:24, 14.25s/it][0;30;43m[TEST][0m
+{'precision': array([0.0803014]), 'recall': array([0.14386888]), 'ndcg': array([0.13410216])}
+(649059, 3)
+EPOCH[33/400] loss0.013-|Sample:4.54|
+  8%|▊         | 33/400 [07:49<1:26:55, 14.21s/it][0;30;43m[TEST][0m
+{'precision': array([0.08003229]), 'recall': array([0.14371394]), 'ndcg': array([0.13395634])}
+(648129, 3)
+EPOCH[34/400] loss0.013-|Sample:4.47|
+  8%|▊         | 34/400 [08:03<1:26:23, 14.16s/it][0;30;43m[TEST][0m
+{'precision': array([0.07992465]), 'recall': array([0.1440938]), 'ndcg': array([0.13344028])}
+(647872, 3)
+EPOCH[35/400] loss0.013-|Sample:4.45|
+  9%|▉         | 35/400 [08:17<1:25:58, 14.13s/it][0;30;43m[TEST][0m
+{'precision': array([0.07933262]), 'recall': array([0.14249003]), 'ndcg': array([0.13244558])}
+(648131, 3)
+EPOCH[36/400] loss0.012-|Sample:4.27|
+  9%|▉         | 36/400 [08:32<1:25:51, 14.15s/it][0;30;43m[TEST][0m
+{'precision': array([0.08003229]), 'recall': array([0.1443256]), 'ndcg': array([0.13381954])}
+(645875, 3)
+EPOCH[37/400] loss0.012-|Sample:4.41|
+  9%|▉         | 37/400 [08:46<1:25:16, 14.09s/it][0;30;43m[TEST][0m
+{'precision': array([0.07895587]), 'recall': array([0.14271728]), 'ndcg': array([0.13247579])}
+(647628, 3)

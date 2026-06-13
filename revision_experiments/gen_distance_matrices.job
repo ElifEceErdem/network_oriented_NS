@@ -1,0 +1,30 @@
+#!/bin/bash
+#SBATCH --job-name=ddmat
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=80G
+#SBATCH --time=103:00:00
+#SBATCH --output=/var/scratch/eerdem/network_oriented_NS/revision_experiments/logs/ddmat_%j.out
+#SBATCH --error=/var/scratch/eerdem/network_oriented_NS/revision_experiments/logs/ddmat_%j.out
+# Generate DD-NS diffusion-distance matrices (one CSV per tau) on the fat node.
+# The matrix exponential of the ~6354x6354 normalized Laplacian is memory-heavy -> fatq + 80G.
+
+set -euo pipefail
+WORKDIR=/var/scratch/eerdem/network_oriented_NS/revision_experiments
+cd "$WORKDIR"
+
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-16}
+export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK:-16}
+
+DATA=/var/scratch/eerdem/network_oriented_NS/LightGCN-PyTorch/data/lastfm
+EDGES="$DATA/graph_edge_list.csv"
+
+# tau grid for the DD-NS sensitivity analysis (reported config = tau=1).
+TAUS="0.5 1 2 4 8"
+
+RSCRIPT=/var/scratch/eerdem/anaconda3/envs/r_diffudist/bin/Rscript
+echo "host=$(hostname) edges=$EDGES taus=$TAUS"
+"$RSCRIPT" gen_distance_matrices.R "$EDGES" "$DATA" $TAUS
+echo "exit=$?"

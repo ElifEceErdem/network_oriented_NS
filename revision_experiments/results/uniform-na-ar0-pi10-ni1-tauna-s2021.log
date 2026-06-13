@@ -1,0 +1,224 @@
+[Sun Jun 14 09:18:03 CEST 2026] host=node422 runtag=uniform-na-ar0-pi10-ni1-tauna-s2021
+cfg: neg_sample=uniform strategy=na ar=0 positem=10 negitem=1 tau=na seed=2021 epochs=400
+[0;30;43mCpp extension not loaded[0m
+>>SEED: 2021
+[0;30;43mloading [last fm][0m
+LastFm Sparsity : 0.006201205012770235
+===========config================
+{'A_n_fold': 100,
+ 'A_split': False,
+ 'add_randomness': 0,
+ 'alpha': 1,
+ 'batch_size': 4096,
+ 'bigdata': False,
+ 'bpr_batch_size': 2048,
+ 'commute_matrix_path': '../data/lastfm/distance_tau1.csv',
+ 'decay': 0.0001,
+ 'dropout': 0,
+ 'gamma': 0.3,
+ 'keep_prob': 0.6,
+ 'latent_dim_rec': 64,
+ 'lightGCN_n_layers': 3,
+ 'lr': 0.001,
+ 'multicore': 1,
+ 'neg_samp_strategy': 'na',
+ 'neg_sample': 'uniform',
+ 'negitem': 1,
+ 'pool': 'mean',
+ 'positem': 10,
+ 'pretrain': 0,
+ 'test_u_batch_size': 100,
+ 'warmup': 100}
+cores for test: 16
+comment: lgn
+tensorboard: 0
+LOAD: 0
+Weight path: /var/scratch/eerdem/network_oriented_NS/revision_experiments/checkpoints/uniform-na-ar0-pi10-ni1-tauna-s2021
+Test Topks: [10]
+using bpr loss
+===========end===================
+[0;30;43muse NORMAL distribution initilizer[0m
+/var/scratch/eerdem/network_oriented_NS/LightGCN-PyTorch/code/dataloader.py:671: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at ../torch/csrc/utils/tensor_new.cpp:605.)
+  self.Graph = torch.sparse.IntTensor(index, data, torch.Size([self.n_users+self.m_items, self.n_users+self.m_items]))
+lgn is already to go(dropout:0)
+load and save to /var/scratch/eerdem/network_oriented_NS/revision_experiments/checkpoints/uniform-na-ar0-pi10-ni1-tauna-s2021/lgn-lastfm-3-64.pth.tar
+[0;30;43mnot enable tensorflowboard[0m
+  0%|          | 0/400 [00:00<?, ?it/s][0;30;43m[TEST][0m
+{'precision': array([0.00096878]), 'recall': array([0.00218235]), 'ndcg': array([0.00156019])}
+UniformSample_original 
+(412386, 3)
+EPOCH[1/400] loss0.692-|Sample:8.83|
+  0%|          | 1/400 [00:15<1:46:02, 15.95s/it][0;30;43m[TEST][0m
+{'precision': array([0.00269107]), 'recall': array([0.00470773]), 'ndcg': array([0.00367175])}
+UniformSample_original 
+(412109, 3)
+EPOCH[2/400] loss0.685-|Sample:7.64|
+  0%|          | 2/400 [00:30<1:39:17, 14.97s/it][0;30;43m[TEST][0m
+{'precision': array([0.01770721]), 'recall': array([0.03526881]), 'ndcg': array([0.02910101])}
+UniformSample_original 
+(411906, 3)
+EPOCH[3/400] loss0.651-|Sample:8.67|
+  1%|          | 3/400 [00:45<1:40:16, 15.15s/it][0;30;43m[TEST][0m
+{'precision': array([0.02378902]), 'recall': array([0.04404354]), 'ndcg': array([0.03766534])}
+UniformSample_original 
+(411977, 3)
+EPOCH[4/400] loss0.519-|Sample:8.78|
+  1%|          | 4/400 [01:01<1:41:04, 15.31s/it][0;30;43m[TEST][0m
+{'precision': array([0.03557589]), 'recall': array([0.06428803]), 'ndcg': array([0.05616038])}
+UniformSample_original 
+(412173, 3)
+EPOCH[5/400] loss0.358-|Sample:8.75|
+  1%|▏         | 5/400 [01:16<1:41:12, 15.37s/it][0;30;43m[TEST][0m
+{'precision': array([0.04854682]), 'recall': array([0.08674293]), 'ndcg': array([0.07570287])}
+UniformSample_original 
+(412157, 3)
+EPOCH[6/400] loss0.258-|Sample:8.66|
+  2%|▏         | 6/400 [01:32<1:41:22, 15.44s/it][0;30;43m[TEST][0m
+{'precision': array([0.05721206]), 'recall': array([0.10190228]), 'ndcg': array([0.09023239])}
+UniformSample_original 
+(412325, 3)
+EPOCH[7/400] loss0.195-|Sample:7.70|
+  2%|▏         | 7/400 [01:46<1:38:41, 15.07s/it][0;30;43m[TEST][0m
+{'precision': array([0.06248654]), 'recall': array([0.11132849]), 'ndcg': array([0.10132906])}
+UniformSample_original 
+(412716, 3)
+EPOCH[8/400] loss0.155-|Sample:8.63|
+  2%|▏         | 8/400 [02:01<1:38:54, 15.14s/it][0;30;43m[TEST][0m
+{'precision': array([0.06797632]), 'recall': array([0.12150976]), 'ndcg': array([0.11032176])}
+UniformSample_original 
+(412464, 3)
+EPOCH[9/400] loss0.127-|Sample:8.28|
+  2%|▏         | 9/400 [02:16<1:38:20, 15.09s/it][0;30;43m[TEST][0m
+{'precision': array([0.07023681]), 'recall': array([0.12488983]), 'ndcg': array([0.11503623])}
+UniformSample_original 
+(412376, 3)
+EPOCH[10/400] loss0.108-|Sample:7.47|
+  2%|▎         | 10/400 [02:30<1:36:17, 14.82s/it][0;30;43m[TEST][0m
+{'precision': array([0.07217438]), 'recall': array([0.12843049]), 'ndcg': array([0.11897022])}
+UniformSample_original 
+(412042, 3)
+EPOCH[11/400] loss0.093-|Sample:7.70|
+  3%|▎         | 11/400 [02:45<1:34:56, 14.64s/it][0;30;43m[TEST][0m
+{'precision': array([0.0752422]), 'recall': array([0.13439628]), 'ndcg': array([0.12394283])}
+UniformSample_original 
+(412308, 3)
+EPOCH[12/400] loss0.081-|Sample:7.40|
+  3%|▎         | 12/400 [02:59<1:33:37, 14.48s/it][0;30;43m[TEST][0m
+{'precision': array([0.07664155]), 'recall': array([0.13680735]), 'ndcg': array([0.12563409])}
+UniformSample_original 
+(412214, 3)
+EPOCH[13/400] loss0.072-|Sample:7.73|
+  3%|▎         | 13/400 [03:13<1:33:16, 14.46s/it][0;30;43m[TEST][0m
+{'precision': array([0.0780409]), 'recall': array([0.14019335]), 'ndcg': array([0.12810172])}
+UniformSample_original 
+(412550, 3)
+EPOCH[14/400] loss0.065-|Sample:7.41|
+  4%|▎         | 14/400 [03:27<1:32:33, 14.39s/it][0;30;43m[TEST][0m
+{'precision': array([0.07933262]), 'recall': array([0.14286583]), 'ndcg': array([0.13054339])}
+UniformSample_original 
+(412478, 3)
+EPOCH[15/400] loss0.060-|Sample:7.73|
+  4%|▍         | 15/400 [03:42<1:32:16, 14.38s/it][0;30;43m[TEST][0m
+{'precision': array([0.08137783]), 'recall': array([0.14629635]), 'ndcg': array([0.1334384])}
+UniformSample_original 
+(412182, 3)
+EPOCH[16/400] loss0.054-|Sample:7.58|
+  4%|▍         | 16/400 [03:56<1:31:52, 14.36s/it][0;30;43m[TEST][0m
+{'precision': array([0.08245425]), 'recall': array([0.14957265]), 'ndcg': array([0.13568018])}
+UniformSample_original 
+(412800, 3)
+EPOCH[17/400] loss0.050-|Sample:7.54|
+  4%|▍         | 17/400 [04:10<1:31:14, 14.29s/it][0;30;43m[TEST][0m
+{'precision': array([0.08250807]), 'recall': array([0.14915596]), 'ndcg': array([0.13563543])}
+UniformSample_original 
+(412409, 3)
+EPOCH[18/400] loss0.046-|Sample:7.67|
+  4%|▍         | 18/400 [04:25<1:31:03, 14.30s/it][0;30;43m[TEST][0m
+{'precision': array([0.08245425]), 'recall': array([0.14961519]), 'ndcg': array([0.13533143])}
+UniformSample_original 
+(412324, 3)
+EPOCH[19/400] loss0.043-|Sample:7.54|
+  5%|▍         | 19/400 [04:39<1:30:42, 14.28s/it][0;30;43m[TEST][0m
+{'precision': array([0.08299247]), 'recall': array([0.15026493]), 'ndcg': array([0.13537569])}
+UniformSample_original 
+(412549, 3)
+EPOCH[20/400] loss0.041-|Sample:7.53|
+  5%|▌         | 20/400 [04:53<1:30:27, 14.28s/it][0;30;43m[TEST][0m
+{'precision': array([0.08310011]), 'recall': array([0.15098476]), 'ndcg': array([0.1354131])}
+UniformSample_original 
+(412247, 3)
+EPOCH[21/400] loss0.038-|Sample:7.66|
+  5%|▌         | 21/400 [05:07<1:30:17, 14.29s/it][0;30;43m[TEST][0m
+{'precision': array([0.08277718]), 'recall': array([0.15020973]), 'ndcg': array([0.1355224])}
+UniformSample_original 
+(412750, 3)
+EPOCH[22/400] loss0.036-|Sample:7.59|
+  6%|▌         | 22/400 [05:23<1:31:58, 14.60s/it][0;30;43m[TEST][0m
+{'precision': array([0.08320775]), 'recall': array([0.1508984]), 'ndcg': array([0.13637277])}
+UniformSample_original 
+(412367, 3)
+EPOCH[23/400] loss0.034-|Sample:7.73|
+  6%|▌         | 23/400 [05:38<1:33:30, 14.88s/it][0;30;43m[TEST][0m
+{'precision': array([0.08310011]), 'recall': array([0.15060254]), 'ndcg': array([0.13686466])}
+UniformSample_original 
+(412834, 3)
+EPOCH[24/400] loss0.033-|Sample:7.41|
+  6%|▌         | 24/400 [05:54<1:33:51, 14.98s/it][0;30;43m[TEST][0m
+{'precision': array([0.08213132]), 'recall': array([0.14827949]), 'ndcg': array([0.13580966])}
+UniformSample_original 
+(411839, 3)
+EPOCH[25/400] loss0.032-|Sample:7.65|
+  6%|▋         | 25/400 [06:09<1:34:25, 15.11s/it][0;30;43m[TEST][0m
+{'precision': array([0.08256189]), 'recall': array([0.14832739]), 'ndcg': array([0.13641135])}
+UniformSample_original 
+(412279, 3)
+EPOCH[26/400] loss0.030-|Sample:7.40|
+  6%|▋         | 26/400 [06:23<1:32:20, 14.82s/it][0;30;43m[TEST][0m
+{'precision': array([0.08385361]), 'recall': array([0.15064941]), 'ndcg': array([0.13715783])}
+UniformSample_original 
+(412648, 3)
+EPOCH[27/400] loss0.028-|Sample:7.70|
+  7%|▋         | 27/400 [06:37<1:31:15, 14.68s/it][0;30;43m[TEST][0m
+{'precision': array([0.08326157]), 'recall': array([0.14915165]), 'ndcg': array([0.13718863])}
+UniformSample_original 
+(412552, 3)
+EPOCH[28/400] loss0.027-|Sample:7.52|
+  7%|▋         | 28/400 [06:52<1:31:40, 14.79s/it][0;30;43m[TEST][0m
+{'precision': array([0.0835845]), 'recall': array([0.15034001]), 'ndcg': array([0.13663803])}
+UniformSample_original 
+(412353, 3)
+EPOCH[29/400] loss0.026-|Sample:7.59|
+  7%|▋         | 29/400 [07:08<1:32:11, 14.91s/it][0;30;43m[TEST][0m
+{'precision': array([0.08277718]), 'recall': array([0.14906876]), 'ndcg': array([0.13563881])}
+UniformSample_original 
+(412762, 3)
+EPOCH[30/400] loss0.026-|Sample:7.44|
+  8%|▊         | 30/400 [07:23<1:32:20, 14.98s/it][0;30;43m[TEST][0m
+{'precision': array([0.08256189]), 'recall': array([0.14864208]), 'ndcg': array([0.13487094])}
+UniformSample_original 
+(411744, 3)
+EPOCH[31/400] loss0.025-|Sample:7.67|
+  8%|▊         | 31/400 [07:37<1:30:54, 14.78s/it][0;30;43m[TEST][0m
+{'precision': array([0.0818084]), 'recall': array([0.14737346]), 'ndcg': array([0.13394521])}
+UniformSample_original 
+(412473, 3)
+EPOCH[32/400] loss0.024-|Sample:7.54|
+  8%|▊         | 32/400 [07:51<1:29:40, 14.62s/it][0;30;43m[TEST][0m
+{'precision': array([0.08164693]), 'recall': array([0.14789943]), 'ndcg': array([0.13417006])}
+UniformSample_original 
+(412852, 3)
+EPOCH[33/400] loss0.024-|Sample:7.57|
+  8%|▊         | 33/400 [08:06<1:28:39, 14.49s/it][0;30;43m[TEST][0m
+{'precision': array([0.08153929]), 'recall': array([0.14606023]), 'ndcg': array([0.13377625])}
+UniformSample_original 
+(412413, 3)
+EPOCH[34/400] loss0.023-|Sample:7.69|
+  8%|▊         | 34/400 [08:20<1:28:07, 14.45s/it][0;30;43m[TEST][0m
+{'precision': array([0.08083961]), 'recall': array([0.14426476]), 'ndcg': array([0.13320314])}
+UniformSample_original 
+(412506, 3)
+EPOCH[35/400] loss0.022-|Sample:7.61|
+  9%|▉         | 35/400 [08:34<1:27:32, 14.39s/it][0;30;43m[TEST][0m
+{'precision': array([0.0810549]), 'recall': array([0.14492027]), 'ndcg': array([0.13341621])}
+UniformSample_original 
+(412037, 3)

@@ -1,0 +1,3 @@
+runtag	neg_sample	neg_samp_strategy	add_randomness	positem	negitem	tau	commute_matrix_path	seed	epochs	dataset	recdim	layer	lr	decay	topks	multicore
+smoke-uniform-s2020	uniform	na	0	10	1	na	na	2020	3	lastfm	64	3	0.001	0.0001	[10]	1
+smoke-pl-normal-ar0-ni2-s2020	naive_random_walk	normal	0	10	2	na	na	2020	3	lastfm	64	3	0.001	0.0001	[10]	1

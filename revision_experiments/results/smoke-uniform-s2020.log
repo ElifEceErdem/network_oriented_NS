@@ -1,0 +1,62 @@
+[Sun Jun 14 01:17:06 CEST 2026] host=node409 runtag=smoke-uniform-s2020
+cfg: neg_sample=uniform strategy=na ar=0 positem=10 negitem=1 tau=na seed=2020 epochs=3
+[0;30;43mCpp extension not loaded[0m
+>>SEED: 2020
+[0;30;43mloading [last fm][0m
+LastFm Sparsity : 0.006201205012770235
+===========config================
+{'A_n_fold': 100,
+ 'A_split': False,
+ 'add_randomness': 0,
+ 'alpha': 1,
+ 'batch_size': 4096,
+ 'bigdata': False,
+ 'bpr_batch_size': 2048,
+ 'commute_matrix_path': '../data/lastfm/distance_tau1.csv',
+ 'decay': 0.0001,
+ 'dropout': 0,
+ 'gamma': 0.3,
+ 'keep_prob': 0.6,
+ 'latent_dim_rec': 64,
+ 'lightGCN_n_layers': 3,
+ 'lr': 0.001,
+ 'multicore': 1,
+ 'neg_samp_strategy': 'na',
+ 'neg_sample': 'uniform',
+ 'negitem': 1,
+ 'pool': 'mean',
+ 'positem': 10,
+ 'pretrain': 0,
+ 'test_u_batch_size': 100,
+ 'warmup': 100}
+cores for test: 16
+comment: lgn
+tensorboard: 0
+LOAD: 0
+Weight path: /var/scratch/eerdem/network_oriented_NS/revision_experiments/checkpoints/smoke-uniform-s2020
+Test Topks: [10]
+using bpr loss
+===========end===================
+[0;30;43muse NORMAL distribution initilizer[0m
+/var/scratch/eerdem/network_oriented_NS/LightGCN-PyTorch/code/dataloader.py:671: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at ../torch/csrc/utils/tensor_new.cpp:605.)
+  self.Graph = torch.sparse.IntTensor(index, data, torch.Size([self.n_users+self.m_items, self.n_users+self.m_items]))
+lgn is already to go(dropout:0)
+load and save to /var/scratch/eerdem/network_oriented_NS/revision_experiments/checkpoints/smoke-uniform-s2020/lgn-lastfm-3-64.pth.tar
+[0;30;43mnot enable tensorflowboard[0m
+  0%|          | 0/3 [00:00<?, ?it/s][0;30;43m[TEST][0m
+{'precision': array([0.00069968]), 'recall': array([0.00133661]), 'ndcg': array([0.00109068])}
+UniformSample_original 
+(412475, 3)
+EPOCH[1/3] loss0.692-|Sample:7.94|
+ 33%|███▎      | 1/3 [00:15<00:30, 15.21s/it][0;30;43m[TEST][0m
+{'precision': array([0.00172228]), 'recall': array([0.00340915]), 'ndcg': array([0.00271844])}
+UniformSample_original 
+(412538, 3)
+EPOCH[2/3] loss0.685-|Sample:8.11|
+ 67%|██████▋   | 2/3 [00:29<00:14, 14.89s/it][0;30;43m[TEST][0m
+{'precision': array([0.01706136]), 'recall': array([0.03422314]), 'ndcg': array([0.02926249])}
+UniformSample_original 
+(412109, 3)
+EPOCH[3/3] loss0.652-|Sample:7.78|
+100%|██████████| 3/3 [00:44<00:00, 14.71s/it]100%|██████████| 3/3 [00:44<00:00, 14.79s/it]
+[Sun Jun 14 01:17:57 CEST 2026] DONE runtag=smoke-uniform-s2020 exit=0
