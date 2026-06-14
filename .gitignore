@@ -11,3 +11,12 @@ LightGCN-PyTorch/data/lastfm/train_with_negs_1_1.pkl
 *.rst
 *.path
 
+
+# --- revision experiments: regenerable / transient artifacts ---
+__pycache__/
+*.pyc
+LightGCN-PyTorch/data/lastfm/ns_cache/
+LightGCN-PyTorch/data/lastfm/distance_tau*.csv
+LightGCN-PyTorch/code/checkpoints/*.pth.tar
+revision_experiments/checkpoints/
+revision_experiments/logs/
